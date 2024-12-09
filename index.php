@@ -12,25 +12,36 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <!-- Custom CSS -->
     <style>
+        /* Paleta de colores basada en Minecraft */
+        :root {
+            --mc-green: #57a639;
+            --mc-gray-dark: #1c1c1c;
+            --mc-gray: #2e2e2e;
+            --mc-white: #f4f4f4;
+        }
+
+        /* Configuración general */
         body {
-            background: linear-gradient(to bottom, #0d6efd, #6610f2);
-            color: white;
+            background: var(--mc-gray-dark);
+            color: var(--mc-white);
             font-family: 'Arial', sans-serif;
         }
 
         .navbar {
-            background-color: rgba(0, 0, 0, 0.8);
+            background-color: var(--mc-gray);
+            border-bottom: 2px solid var(--mc-green);
         }
 
         .header {
-            background: url('https://images.unsplash.com/photo-1523741543316-beb7fc7023d8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDE4fHxtaW5lY3JhZnR8ZW58MHx8fHwxNjg3Mjk0NzEy&ixlib=rb-1.2.1&q=80&w=1080') no-repeat center center/cover;
+            background: url('data/bgs/bg-01.jpg') no-repeat center center/cover;
             height: 500px;
             text-align: center;
-            color: white;
+            color: var(--mc-white);
             display: flex;
             align-items: center;
             justify-content: center;
             flex-direction: column;
+            border-bottom: 2px solid var(--mc-green);
         }
 
         .header h1 {
@@ -45,27 +56,49 @@
         }
 
         .server-info {
-            background-color: rgba(255, 255, 255, 0.2);
+            background-color: var(--mc-gray);
             padding: 2rem;
             border-radius: 15px;
-            margin-bottom: 2rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .server-info h3 {
+            color: var(--mc-green);
+        }
+
+        .btn-custom {
+            background-color: var(--mc-green);
+            color: var(--mc-white);
+            border: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-custom:hover {
+            background-color: #3e7c2d;
+        }
+
+        .list-group-item {
+            background-color: transparent;
+            border: 1px solid var(--mc-gray);
+            color: var(--mc-white);
+        }
+
+        .list-group-item:hover {
+            background-color: var(--mc-green);
+            color: var(--mc-white);
         }
 
         .footer {
-            background-color: rgba(0, 0, 0, 0.9);
-            color: white;
+            background-color: var(--mc-gray);
+            border-top: 2px solid var(--mc-green);
+            color: var(--mc-white);
             text-align: center;
             padding: 1rem;
         }
 
-        .btn-custom {
-            background-color: #6610f2;
-            color: white;
-            border: none;
-        }
-
-        .btn-custom:hover {
-            background-color: #0d6efd;
+        /* Estilo de imagen de MVP */
+        .mvp-img {
+            border: 3px solid var(--mc-green);
         }
     </style>
 </head>
@@ -91,7 +124,7 @@
     <!-- Header -->
     <div class="header">
         <h1>¡Bienvenido a MC Duotics!</h1>
-        <p>La mejor experiencia en Minecraft: <b>mc.duotics.com:6066</b></p>
+        <p>La mejor experiencia en Minecraft</p>
         <a href="#info" class="btn btn-custom btn-lg mt-3">Explorar más</a>
     </div>
 
@@ -118,12 +151,12 @@
                 </div>
 
                 <div class="col-sm-3">
-                    <h3>Miembro mas Valioso</h3>
+                    <h3>Miembro más Valioso</h3>
                     <h4><strong>Frank Barraza</strong></h4>
                     <div class="mb-2">
-                        <img src="data/images/frank-barraza.jpg" alt="" class="img-fluid rounded-circle" style="max-height: 100px;">
+                        <img src="data/images/frank-barraza.jpg" alt="Frank Barraza" class="img-fluid rounded-circle mvp-img" style="max-height: 100px;">
                     </div>
-                    <p><b>Rango:</b> <span id="player-count">GOD</span></p>
+                    <p><b>Rango:</b> <span id="player-rank">GOD</span></p>
                 </div>
             </div>
         </div>
@@ -134,10 +167,10 @@
         <div class="server-info">
             <h2>Reglas del Servidor</h2>
             <ul class="list-group mt-3">
-                <li class="list-group-item bg-transparent text-white">1. Respeta a todos los jugadores.</li>
-                <li class="list-group-item bg-transparent text-white">2. Prohibido el uso de hacks o mods no permitidos.</li>
-                <li class="list-group-item bg-transparent text-white">3. Evita el spam en el chat.</li>
-                <li class="list-group-item bg-transparent text-white">4. Disfruta y diviértete al máximo.</li>
+                <li class="list-group-item">1. Respeta a todos los jugadores.</li>
+                <li class="list-group-item">2. Prohibido el uso de hacks o mods no permitidos.</li>
+                <li class="list-group-item">3. Evita el spam en el chat.</li>
+                <li class="list-group-item">4. Disfruta y diviértete al máximo.</li>
             </ul>
         </div>
     </section>
@@ -161,26 +194,7 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        const serverIP = "mcj.duotics.com";
-        const serverPort = 6066;
-
-        async function fetchServerData() {
-            try {
-                const response = await fetch(`https://mcapi.us/server/status?ip=${serverIP}&port=${serverPort}`);
-                const data = await response.json();
-
-                document.getElementById("server-status").textContent = data.online ? "Sí" : "No";
-                document.getElementById("server-version").textContent = data.server.name || "N/A";
-                document.getElementById("player-count").textContent = `${data.players.now} / ${data.players.max}`;
-            } catch (error) {
-                console.error("Error al consultar la API:", error);
-            }
-        }
-
-        fetchServerData();
-        setInterval(fetchServerData, 10000); // Actualiza cada 30 segundos
-    </script>
+    <script src="resources/js/index.js"></script>
 </body>
 
 </html>
