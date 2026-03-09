@@ -1,372 +1,256 @@
-// ========================================
-// CONFIGURACIÓN DEL SERVIDOR
-// ========================================
-const serverIP = "mcj.duotics.com";
-const serverPort = 6066;
+/* =============================================
+   EL COFRE DE FRANK — Main JS
+   ============================================= */
 
-// ========================================
-// SLIDER DE FONDO SIMPLE
-// ========================================
-class MinecraftSlider {
-    constructor() {
-        this.slides = document.querySelectorAll('.slide');
-        this.indicators = document.querySelectorAll('.indicator');
-        this.currentSlide = 0;
-        this.isTransitioning = false;
-        this.autoSlideInterval = null;
-        
-        this.init();
-    }
-    
-    init() {
-        this.startAutoSlide();
-        this.addEventListeners();
-        this.preloadImages();
-    }
-    
-    preloadImages() {
-        const imageUrls = [
-            'data/bgs/bg-01.jpg',
-            'data/bgs/bg-02.jpg',
-            'data/bgs/bg-03.jpg',
-            'data/bgs/bg-04.jpg',
-            'data/bgs/bg-05.jpg',
-            'data/bgs/bg-06.jpg'
-        ];
-        
-        imageUrls.forEach(url => {
-            const img = new Image();
-            img.src = url;
-        });
-    }
-    
-    addEventListeners() {
-        // Pausar autoplay en hover
-        document.querySelector('.header').addEventListener('mouseenter', () => {
-            this.pauseAutoSlide();
-        });
-        
-        document.querySelector('.header').addEventListener('mouseleave', () => {
-            this.startAutoSlide();
-        });
-        
-        // Controles de teclado
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowLeft') this.changeSlide(-1);
-            if (e.key === 'ArrowRight') this.changeSlide(1);
-        });
-    }
-    
-    changeSlide(direction) {
-        if (this.isTransitioning) return;
-        
-        this.isTransitioning = true;
-        this.pauseAutoSlide();
-        
-        // Cambiar slide sin cortina
-        this.slides[this.currentSlide].classList.remove('active');
-        this.indicators[this.currentSlide].classList.remove('active');
-        
-        if (direction > 0) {
-            this.currentSlide = (this.currentSlide + 1) % this.slides.length;
-        } else {
-            this.currentSlide = (this.currentSlide - 1 + this.slides.length) % this.slides.length;
-        }
-        
-        this.slides[this.currentSlide].classList.add('active');
-        this.indicators[this.currentSlide].classList.add('active');
-        
-        setTimeout(() => {
-            this.isTransitioning = false;
-            this.startAutoSlide();
-        }, 500);
-    }
-    
-    goToSlide(index) {
-        if (this.isTransitioning || index === this.currentSlide) return;
-        
-        const direction = index > this.currentSlide ? 1 : -1;
-        this.currentSlide = index;
-        this.changeSlide(direction);
-    }
-    
-    startAutoSlide() {
-        this.pauseAutoSlide();
-        this.autoSlideInterval = setInterval(() => {
-            this.changeSlide(1);
-        }, 5000);
-    }
-    
-    pauseAutoSlide() {
-        if (this.autoSlideInterval) {
-            clearInterval(this.autoSlideInterval);
-            this.autoSlideInterval = null;
-        }
-    }
-}
+(function () {
+    'use strict';
 
-// ========================================
-// FUNCIONES GLOBALES PARA EL SLIDER
-// ========================================
-let slider;
+    /* ----- Hero Slider ----- */
+    const slides = document.querySelectorAll('.hero-slide');
+    const dots = document.querySelectorAll('.hero-dot');
+    let currentSlide = 0;
+    let slideTimer;
 
-function changeSlide(direction) {
-    if (slider) slider.changeSlide(direction);
-}
-
-function goToSlide(index) {
-    if (slider) slider.goToSlide(index);
-}
-
-// ========================================
-// SISTEMA DE LUCIÉRNAGAS VERDES
-// ========================================
-class MinecraftFireflies {
-    constructor() {
-        this.canvas = document.createElement('canvas');
-        this.ctx = this.canvas.getContext('2d');
-        this.fireflies = [];
-        this.setup();
+    function goToSlide(index) {
+        slides[currentSlide].classList.remove('active');
+        dots[currentSlide].classList.remove('active');
+        currentSlide = (index + slides.length) % slides.length;
+        slides[currentSlide].classList.add('active');
+        dots[currentSlide].classList.add('active');
     }
-    
-    setup() {
-        this.canvas.style.position = 'absolute';
-        this.canvas.style.top = '0';
-        this.canvas.style.left = '0';
-        this.canvas.style.width = '100%';
-        this.canvas.style.height = '100%';
-        this.canvas.style.pointerEvents = 'none';
-        this.canvas.style.zIndex = '5';
-        
-        document.querySelector('.header').appendChild(this.canvas);
-        
-        this.resize();
-        this.createFireflies();
-        this.animate();
-        
-        window.addEventListener('resize', () => this.resize());
-    }
-    
-    resize() {
-        this.canvas.width = window.innerWidth;
-        this.canvas.height = window.innerHeight;
-    }
-    
-    createFireflies() {
-        const fireflyCount = Math.min(30, Math.floor(window.innerWidth / 50));
-        
-        for (let i = 0; i < fireflyCount; i++) {
-            this.fireflies.push({
-                x: Math.random() * this.canvas.width,
-                y: Math.random() * this.canvas.height,
-                size: Math.random() * 3 + 1,
-                speedX: (Math.random() - 0.5) * 0.8,
-                speedY: (Math.random() - 0.5) * 0.8,
-                opacity: Math.random() * 0.7 + 0.3,
-                glowIntensity: Math.random() * 0.5 + 0.3,
-                pulseSpeed: Math.random() * 0.02 + 0.01,
-                pulsePhase: Math.random() * Math.PI * 2
-            });
-        }
-    }
-    
-    animate() {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        
-        this.fireflies.forEach(firefly => {
-            // Actualizar posición con movimiento orgánico
-            firefly.x += firefly.speedX;
-            firefly.y += firefly.speedY;
-            
-            // Cambiar dirección suavemente
-            if (Math.random() < 0.02) {
-                firefly.speedX += (Math.random() - 0.5) * 0.1;
-                firefly.speedY += (Math.random() - 0.5) * 0.1;
-                
-                // Limitar velocidad
-                firefly.speedX = Math.max(-1, Math.min(1, firefly.speedX));
-                firefly.speedY = Math.max(-1, Math.min(1, firefly.speedY));
-            }
-            
-            // Rebotar suavemente en los bordes
-            if (firefly.x <= 0 || firefly.x >= this.canvas.width) {
-                firefly.speedX *= -0.8;
-                firefly.x = Math.max(0, Math.min(this.canvas.width, firefly.x));
-            }
-            if (firefly.y <= 0 || firefly.y >= this.canvas.height) {
-                firefly.speedY *= -0.8;
-                firefly.y = Math.max(0, Math.min(this.canvas.height, firefly.y));
-            }
-            
-            // Actualizar efecto de pulso
-            firefly.pulsePhase += firefly.pulseSpeed;
-            const pulseFactor = Math.sin(firefly.pulsePhase) * 0.3 + 0.7;
-            const currentOpacity = firefly.opacity * pulseFactor;
-            const currentGlow = firefly.glowIntensity * pulseFactor;
-            
-            // Dibujar resplandor exterior (halo)
-            const gradient = this.ctx.createRadialGradient(
-                firefly.x, firefly.y, 0,
-                firefly.x, firefly.y, firefly.size * 8
-            );
-            gradient.addColorStop(0, `rgba(87, 166, 57, ${currentGlow})`);
-            gradient.addColorStop(0.3, `rgba(87, 166, 57, ${currentGlow * 0.3})`);
-            gradient.addColorStop(1, 'rgba(87, 166, 57, 0)');
-            
-            this.ctx.fillStyle = gradient;
-            this.ctx.beginPath();
-            this.ctx.arc(firefly.x, firefly.y, firefly.size * 8, 0, Math.PI * 2);
-            this.ctx.fill();
-            
-            // Dibujar luciérnaga central
-            this.ctx.beginPath();
-            this.ctx.arc(firefly.x, firefly.y, firefly.size, 0, Math.PI * 2);
-            this.ctx.fillStyle = `rgba(144, 238, 144, ${currentOpacity})`;
-            this.ctx.fill();
-            
-            // Núcleo brillante
-            this.ctx.beginPath();
-            this.ctx.arc(firefly.x, firefly.y, firefly.size * 0.4, 0, Math.PI * 2);
-            this.ctx.fillStyle = `rgba(255, 255, 255, ${currentOpacity * 0.8})`;
-            this.ctx.fill();
-        });
-        
-        requestAnimationFrame(() => this.animate());
-    }
-}
 
-// ========================================
-// EFECTOS ADICIONALES SIMPLIFICADOS
-// ========================================
-class MinecraftEffects {
-    static init() {
-        this.addScrollEffects();
-        this.addHoverEffects();
+    function nextSlide() {
+        goToSlide(currentSlide + 1);
     }
-    
-    static addScrollEffects() {
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-        
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }
-            });
-        }, observerOptions);
-        
-        // Observar elementos que deben animarse al scroll
-        document.querySelectorAll('.server-info, .list-group-item').forEach(el => {
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(30px)';
-            el.style.transition = 'all 0.6s ease';
-            observer.observe(el);
-        });
+
+    function startSlider() {
+        slideTimer = setInterval(nextSlide, 6000);
     }
-    
-    static addHoverEffects() {
-        // Efecto de hover mejorado para botones
-        document.querySelectorAll('.btn-custom').forEach(btn => {
-            btn.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-5px) scale(1.05)';
-            });
-            
-            btn.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0) scale(1)';
-            });
-        });
-    }
-}
 
-// ========================================
-// CONSULTA DEL SERVIDOR
-// ========================================
-async function fetchServerData() {
-    try {
-        const response = await fetch(`https://mcapi.us/server/status?ip=${serverIP}&port=${serverPort}`);
-        const data = await response.json();
-
-        // Actualizar estado del servidor con animación
-        updateServerStatus(data.online ? "✅ Online" : "❌ Offline");
-        updateServerVersion(data.server?.name || "N/A");
-        updatePlayerCount(`${data.players?.now || 0} / ${data.players?.max || 0}`);
-        
-        // Agregar efecto de parpadeo si el servidor está online
-        if (data.online) {
-            document.getElementById("server-status").classList.add('text-success');
-        } else {
-            document.getElementById("server-status").classList.add('text-danger');
-        }
-        
-    } catch (error) {
-        console.error("Error al consultar la API:", error);
-        updateServerStatus("❌ Error");
-        updateServerVersion("N/A");
-        updatePlayerCount("N/A");
-    }
-}
-
-function updateServerStatus(status) {
-    const element = document.getElementById("server-status");
-    element.style.opacity = '0';
-    setTimeout(() => {
-        element.textContent = status;
-        element.style.opacity = '1';
-    }, 200);
-}
-
-function updateServerVersion(version) {
-    const element = document.getElementById("server-version");
-    element.style.opacity = '0';
-    setTimeout(() => {
-        element.textContent = version;
-        element.style.opacity = '1';
-    }, 200);
-}
-
-function updatePlayerCount(count) {
-    const element = document.getElementById("player-count");
-    element.style.opacity = '0';
-    setTimeout(() => {
-        element.textContent = count;
-        element.style.opacity = '1';
-    }, 200);
-}
-
-// ========================================
-// INICIALIZACIÓN SIMPLIFICADA
-// ========================================
-document.addEventListener('DOMContentLoaded', function() {
-    // Inicializar slider simple
-    slider = new MinecraftSlider();
-    
-    // Inicializar luciérnagas verdes
-    new MinecraftFireflies();
-    
-    // Inicializar efectos básicos
-    MinecraftEffects.init();
-    
-    // Consultar datos del servidor
-    fetchServerData();
-    setInterval(fetchServerData, 30000); // Actualizar cada 30 segundos
-    
-    // Smooth scrolling para enlaces internos
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-            }
+    dots.forEach(function (dot) {
+        dot.addEventListener('click', function () {
+            clearInterval(slideTimer);
+            goToSlide(parseInt(this.dataset.slide, 10));
+            startSlider();
         });
     });
-    
-    console.log('🎮 Minecraft Duotics - Sistema iniciado correctamente 🟢');
-});
+
+    if (slides.length > 1) startSlider();
+
+    /* ----- Chest Animation (auto open/close) ----- */
+    const chest = document.getElementById('chestWrapper');
+    let chestOpen = false;
+
+    function toggleChest() {
+        chestOpen = !chestOpen;
+        if (chestOpen) {
+            chest.classList.add('chest-open');
+        } else {
+            chest.classList.remove('chest-open');
+        }
+    }
+
+    // Auto-cycle every 5 seconds
+    setInterval(function () {
+        toggleChest();
+        // Auto close after 2.5s if open
+        if (chestOpen) {
+            setTimeout(function () {
+                if (chestOpen) toggleChest();
+            }, 2500);
+        }
+    }, 5000);
+
+    // Click to toggle
+    if (chest) {
+        chest.addEventListener('click', function () {
+            toggleChest();
+        });
+    }
+
+    /* ----- Navbar scroll ----- */
+    var navbar = document.getElementById('mainNavbar');
+
+    function onScroll() {
+        if (window.scrollY > 60) {
+            navbar.classList.add('scrolled');
+        } else {
+            navbar.classList.remove('scrolled');
+        }
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    /* ----- Mobile nav toggle ----- */
+    var navToggle = document.getElementById('navToggle');
+    var navLinks = document.getElementById('navLinks');
+
+    if (navToggle && navLinks) {
+        navToggle.addEventListener('click', function () {
+            navLinks.classList.toggle('open');
+            var icon = navToggle.querySelector('i');
+            if (navLinks.classList.contains('open')) {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-times');
+            } else {
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
+        });
+
+        // Close on link click
+        navLinks.querySelectorAll('a').forEach(function (link) {
+            link.addEventListener('click', function () {
+                navLinks.classList.remove('open');
+                var icon = navToggle.querySelector('i');
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            });
+        });
+    }
+
+    /* ----- Reveal on scroll ----- */
+    var reveals = document.querySelectorAll('.reveal');
+
+    var revealObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                revealObserver.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.12 });
+
+    reveals.forEach(function (el) {
+        revealObserver.observe(el);
+    });
+
+    /* ----- Bento card mouse tracking ----- */
+    document.querySelectorAll('.bento-card').forEach(function (card) {
+        card.addEventListener('mousemove', function (e) {
+            var rect = card.getBoundingClientRect();
+            card.style.setProperty('--mouse-x', (e.clientX - rect.left) + 'px');
+            card.style.setProperty('--mouse-y', (e.clientY - rect.top) + 'px');
+        });
+    });
+
+    /* ----- Copy IP ----- */
+    window.copyIP = function (ip) {
+        navigator.clipboard.writeText(ip).then(function () {
+            // Find the button that was clicked
+            var btns = document.querySelectorAll('.btn-copy');
+            btns.forEach(function (btn) {
+                if (btn.getAttribute('onclick').indexOf(ip) !== -1) {
+                    btn.classList.add('copied');
+                    btn.innerHTML = '<i class="fas fa-check"></i> Copiado';
+                    setTimeout(function () {
+                        btn.classList.remove('copied');
+                        btn.innerHTML = '<i class="fas fa-copy"></i> Copiar';
+                    }, 2000);
+                }
+            });
+        });
+    };
+
+    /* ----- Server Status ----- */
+    function fetchServerStatus() {
+        var statusDot = document.getElementById('statusDot');
+        var statusText = document.getElementById('statusText');
+        var serverVersion = document.getElementById('serverVersion');
+        var playerCount = document.getElementById('playerCount');
+
+        var apiURL = 'https://mcapi.us/server/status?ip=mcj.duotics.com&port=6066';
+
+        fetch(apiURL)
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (data.online) {
+                    statusDot.classList.add('online');
+                    statusText.textContent = 'Online';
+                    statusText.className = 'status-text online';
+                    serverVersion.textContent = data.server ? data.server.name : '—';
+                    playerCount.textContent = (data.players ? data.players.now : 0) + ' / ' + (data.players ? data.players.max : '?');
+                } else {
+                    statusDot.classList.remove('online');
+                    statusText.textContent = 'Offline';
+                    statusText.className = 'status-text offline';
+                    serverVersion.textContent = '—';
+                    playerCount.textContent = '0';
+                }
+            })
+            .catch(function () {
+                statusText.textContent = 'Error';
+                statusText.className = 'status-text offline';
+            });
+    }
+
+    fetchServerStatus();
+    setInterval(fetchServerStatus, 60000);
+
+    /* ----- Hero Particles Canvas ----- */
+    var canvas = document.getElementById('heroParticles');
+    if (canvas) {
+        var ctx = canvas.getContext('2d');
+        var particles = [];
+        var particleCount = 35;
+
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.offsetWidth;
+            canvas.height = canvas.parentElement.offsetHeight;
+        }
+
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        function Particle() {
+            this.reset();
+        }
+
+        Particle.prototype.reset = function () {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.size = Math.random() * 2 + 0.5;
+            this.speedX = (Math.random() - 0.5) * 0.3;
+            this.speedY = -Math.random() * 0.4 - 0.1;
+            this.opacity = Math.random() * 0.5 + 0.1;
+            this.color = Math.random() > 0.5 ? '#c8a24e' : '#4ade80';
+        };
+
+        Particle.prototype.update = function () {
+            this.x += this.speedX;
+            this.y += this.speedY;
+            this.opacity -= 0.001;
+
+            if (this.opacity <= 0 || this.y < -10 || this.x < -10 || this.x > canvas.width + 10) {
+                this.reset();
+                this.y = canvas.height + 10;
+            }
+        };
+
+        Particle.prototype.draw = function () {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fillStyle = this.color;
+            ctx.globalAlpha = this.opacity;
+            ctx.fill();
+        };
+
+        for (var i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(function (p) {
+                p.update();
+                p.draw();
+            });
+            ctx.globalAlpha = 1;
+            requestAnimationFrame(animateParticles);
+        }
+
+        animateParticles();
+    }
+
+})();
